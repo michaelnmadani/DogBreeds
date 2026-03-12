@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dog Breed Finder</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="logo">🐾 Dog Breed Finder</div>
+      <div class="progress-wrapper" id="progressWrapper" aria-hidden="true">
+        <div class="progress-label">
+          <span id="progressText">Question 1 of 12</span>
+          <span id="progressPct">0%</span>
+        </div>
+        <div class="progress-track" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" id="progressBar">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <div class="progress-dots" id="progressDots"></div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main content area -->
+  <main class="main" id="app">
+
+    <!-- Welcome screen -->
+    <section class="screen active" id="screenWelcome">
+      <div class="welcome-card">
+        <div class="welcome-icon">🐶</div>
+        <h1>Find Your Perfect Dog Breed</h1>
+        <p>Answer 12 quick questions about your lifestyle and we'll recommend the top 5 dog breeds that match you best — complete with photos and reasons why.</p>
+        <ul class="welcome-features">
+          <li>✔ 12 lifestyle questions</li>
+          <li>✔ Personalised top 5 results</li>
+          <li>✔ Real photos of each breed</li>
+          <li>✔ Explanation for every recommendation</li>
+        </ul>
+        <button class="btn btn-primary btn-large" id="startBtn">Let's Find Your Breed →</button>
+      </div>
+    </section>
+
+    <!-- Quiz screen -->
+    <section class="screen" id="screenQuiz">
+      <div class="quiz-container">
+        <div class="question-card" id="questionCard">
+          <div class="question-header">
+            <span class="question-number" id="questionNumber">1 / 12</span>
+            <span class="question-category" id="questionCategory">Lifestyle</span>
+          </div>
+          <h2 class="question-text" id="questionText"></h2>
+          <div class="options-grid" id="optionsGrid"></div>
+          <div class="quiz-nav">
+            <button class="btn btn-ghost" id="backBtn" disabled>← Back</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Loading screen -->
+    <section class="screen" id="screenLoading">
+      <div class="loading-card">
+        <div class="paw-spinner">
+          <span>🐾</span>
+        </div>
+        <h2>Finding your perfect matches…</h2>
+        <p>Analysing your answers against our breed database</p>
+        <div class="loading-bar-track">
+          <div class="loading-bar-fill" id="loadingBarFill"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Results screen -->
+    <section class="screen" id="screenResults">
+      <div class="results-container">
+        <div class="results-header">
+          <h1>Your Top 5 Dog Breeds</h1>
+          <p class="results-subtitle">Based on your answers, here are the breeds that suit your lifestyle best</p>
+        </div>
+        <div class="results-grid" id="resultsGrid"></div>
+        <div class="results-footer">
+          <button class="btn btn-outline" id="restartBtn">↩ Start Over</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
