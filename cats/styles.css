@@ -691,12 +691,16 @@ body {
   padding: 8px 12px;
 }
 
-.adopt-callout {
+.breed-tag-allergy {
+  background: #e8f5ee;
+  color: #1f6b45;
+  border-color: #bfe3cf;
+}
+
+.callout {
   display: flex;
   gap: 14px;
   align-items: flex-start;
-  background: var(--primary-light);
-  border: 1px solid #e2d8f0;
   border-radius: var(--radius);
   padding: 18px 20px;
   margin-bottom: 28px;
@@ -705,14 +709,40 @@ body {
   color: var(--text);
 }
 
-.adopt-callout strong {
+/* display:flex above would otherwise override the hidden attribute */
+.callout[hidden] {
+  display: none;
+}
+
+.callout-adopt {
+  background: var(--primary-light);
+  border: 1px solid #e2d8f0;
+}
+
+.callout-adopt strong {
   color: var(--primary-dark);
 }
 
-.adopt-icon {
+.callout-allergy {
+  background: #eef8f2;
+  border: 1px solid #bfe3cf;
+}
+
+.callout-allergy strong {
+  color: #1f6b45;
+}
+
+.callout-icon {
   font-size: 1.6rem;
   line-height: 1;
   flex-shrink: 0;
+}
+
+.callout-list {
+  margin: 8px 0 0 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 /* ============================================================

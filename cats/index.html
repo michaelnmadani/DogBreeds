@@ -36,6 +36,7 @@
         <p>Answer 12 quick questions about your lifestyle and we'll recommend the top 5 cat breeds that match you best — complete with photos and reasons why.</p>
         <ul class="welcome-features">
           <li>✔ 12 lifestyle questions</li>
+          <li id="breedCount">✔ 50 breeds, including allergy-friendlier picks</li>
           <li>✔ Personalised top 5 results</li>
           <li>✔ Real photos of each breed</li>
           <li>✔ Explanation for every recommendation</li>
@@ -83,9 +84,23 @@
           <h1>Your Top 5 Cat Breeds</h1>
           <p class="results-subtitle">Based on your answers, here are the breeds that suit your lifestyle best</p>
         </div>
+        <aside class="callout callout-allergy" id="allergyCallout" hidden>
+          <div class="callout-icon" aria-hidden="true">🤧</div>
+          <div>
+            <strong>Showing allergy-friendlier breeds only.</strong>
+            No cat is truly hypoallergenic: the main allergen, Fel d 1, comes from saliva and skin rather than fur, and levels vary more between individual cats than between breeds. Before you commit:
+            <ul class="callout-list">
+              <li>Spend time with the specific cat, ideally more than once.</li>
+              <li>Females and neutered males produce less allergen than intact males.</li>
+              <li>Cat food with an anti-Fel d 1 antibody cut active allergen on cats' hair by 47% on average in one study.</li>
+              <li>Keep the cat out of the bedroom, use HEPA filters, wash bedding weekly and let someone else clean the litter box.</li>
+              <li>If allergies are severe or trigger asthma, talk to an allergist first.</li>
+            </ul>
+          </div>
+        </aside>
         <div class="results-grid" id="resultsGrid"></div>
-        <aside class="adopt-callout">
-          <div class="adopt-icon" aria-hidden="true">🏠</div>
+        <aside class="callout callout-adopt">
+          <div class="callout-icon" aria-hidden="true">🏠</div>
           <div>
             <strong>Consider adopting, too.</strong>
             Shelters are full of wonderful mixed-breed cats, and many purebreds end up in rescue. Tell your local shelter the traits you're after (quiet, playful, good with dogs…) and they can match you with an adult cat whose personality is already known.

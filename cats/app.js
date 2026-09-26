@@ -4,6 +4,10 @@
    scoring engine, with cat-specific questions and breed data.
    ============================================================ */
 
+// Breeds scoring at least this for coat.allergy are "allergy-friendlier": they get
+// a badge, and are the only breeds shown when someone in the home has allergies.
+const ALLERGY_FRIENDLY_MIN = 2;
+
 // ── QUESTIONS ─────────────────────────────────────────────────────────────────
 
 const QUESTIONS = [
@@ -109,7 +113,7 @@ const QUESTIONS = [
     options: [
       { value: 'fine',     icon: '😄', label: 'Fur is fine',          desc: 'No allergies — fluff welcome' },
       { value: 'low_shed', icon: '🧹', label: 'Prefer low shedding',  desc: 'Less hair on the sofa, please' },
-      { value: 'allergy',  icon: '🤧', label: 'Someone has mild allergies', desc: 'Looking for lower-allergen breeds (no cat is allergen-free)' },
+      { value: 'allergy',  icon: '🤧', label: 'Allergies in the home', desc: 'Only show breeds often suggested for allergy sufferers', minWeight: ALLERGY_FRIENDLY_MIN },
     ],
   },
   {
@@ -150,7 +154,7 @@ const QUESTIONS = [
 // ── BREED DATABASE ─────────────────────────────────────────────────────────────
 // Each breed has weighted trait scores (0–3) across each answer dimension.
 // The recommendation engine sums matching weights from the user's answers.
-// catApiId is TheCatAPI breed id; wikiTitle is the fallback image source.
+// catApiId is TheCatAPI breed id (null if not listed); wikiTitle is the fallback image source.
 // note is a "good to know" caveat (health, care or legal) shown on every card.
 
 const BREEDS = [
@@ -270,6 +274,34 @@ const BREEDS = [
     note: 'Shares the Persian\'s flat face, so watch for breathing issues and tear staining. Choose breeders who avoid extreme faces.',
   },
   {
+    name: 'Himalayan',
+    catApiId: 'hima',
+    wikiTitle: 'Himalayan_cat',
+    tags: ['Lap cat', 'Blue-eyed', 'Glamorous coat'],
+    traits: {
+      activity:    { low: 3, medium: 2, high: 0, very: 0 },
+      space:       { small_apt: 3, apt: 3, house: 3, outdoor: 1 },
+      children:    { none: 3, young: 1, older: 2 },
+      pets:        { none: 3, dogs: 2, cats: 2, both: 2 },
+      alone:       { rarely: 2, few: 3, half: 3, long: 2 },
+      temperament: { lap: 3, companion: 3, independent: 1, playful: 1 },
+      vocal:       { quiet: 3, some: 1, chatty: 0 },
+      size:        { small: 1, medium: 3, large: 1, any: 3 },
+      coat:        { fine: 3, low_shed: 0, allergy: 0 },
+      grooming:    { low: 0, medium: 1, high: 3 },
+      experience:  { first: 2, some: 3, expert: 3 },
+      household:   { quiet: 3, occasional: 2, lively: 0 },
+    },
+    reasons: {
+      temperament_lap:   'A sweet, blue-eyed lap cat',
+      vocal_quiet:       'Quiet and gentle-voiced',
+      activity_low:      'Content with calm play and long naps',
+      household_quiet:   'Thrives in a peaceful home',
+      grooming_high:     'Rewards daily grooming with a spectacular coat',
+    },
+    note: 'A Persian with Siamese-style points, so it needs daily combing and eye cleaning. Flat faces can cause breathing, eye and dental problems — choose moderate-faced, PKD-tested lines.',
+  },
+  {
     name: 'British Shorthair',
     catApiId: 'bsho',
     wikiTitle: 'British_Shorthair',
@@ -297,6 +329,34 @@ const BREEDS = [
       experience_first:    'Undemanding and easy to care for',
     },
     note: 'Prone to weight gain — keep them active and portion meals. Many prefer sitting beside you to being picked up.',
+  },
+  {
+    name: 'British Longhair',
+    catApiId: 'bslo',
+    wikiTitle: 'British_Longhair',
+    tags: ['Calm', 'Plush longhair', 'Independent'],
+    traits: {
+      activity:    { low: 3, medium: 3, high: 1, very: 0 },
+      space:       { small_apt: 3, apt: 3, house: 3, outdoor: 2 },
+      children:    { none: 2, young: 3, older: 3 },
+      pets:        { none: 3, dogs: 3, cats: 3, both: 3 },
+      alone:       { rarely: 2, few: 3, half: 3, long: 2 },
+      temperament: { lap: 1, companion: 2, independent: 3, playful: 1 },
+      vocal:       { quiet: 3, some: 1, chatty: 0 },
+      size:        { small: 0, medium: 2, large: 3, any: 3 },
+      coat:        { fine: 3, low_shed: 0, allergy: 0 },
+      grooming:    { low: 1, medium: 3, high: 3 },
+      experience:  { first: 3, some: 3, expert: 2 },
+      household:   { quiet: 3, occasional: 3, lively: 2 },
+    },
+    reasons: {
+      alone_half:          'Happy to hang out at home while you are at work',
+      temperament_independent: 'Affectionate but never clingy',
+      children_young:      'Gentle and patient with children',
+      activity_low:        'Would rather nap than chase a laser pointer',
+      experience_first:    'Steady and undemanding for first-time owners',
+    },
+    note: 'Sheds heavily in spring and autumn, so comb more often then. Many dislike being picked up. Watch their weight.',
   },
   {
     name: 'American Shorthair',
@@ -327,10 +387,38 @@ const BREEDS = [
     note: 'A generally healthy, hardy breed, but prone to putting on weight. Portion control matters.',
   },
   {
+    name: 'American Curl',
+    catApiId: 'acur',
+    wikiTitle: 'American_Curl',
+    tags: ['Curled ears', 'Playful', 'People-oriented'],
+    traits: {
+      activity:    { low: 1, medium: 3, high: 3, very: 2 },
+      space:       { small_apt: 3, apt: 3, house: 3, outdoor: 2 },
+      children:    { none: 2, young: 3, older: 3 },
+      pets:        { none: 2, dogs: 3, cats: 3, both: 3 },
+      alone:       { rarely: 3, few: 2, half: 1, long: 0 },
+      temperament: { lap: 2, companion: 3, independent: 0, playful: 3 },
+      vocal:       { quiet: 3, some: 2, chatty: 0 },
+      size:        { small: 1, medium: 3, large: 1, any: 3 },
+      coat:        { fine: 3, low_shed: 1, allergy: 0 },
+      grooming:    { low: 3, medium: 3, high: 2 },
+      experience:  { first: 3, some: 3, expert: 2 },
+      household:   { quiet: 2, occasional: 3, lively: 3 },
+    },
+    reasons: {
+      temperament_playful: 'Keeps a kitten-like playfulness well into adulthood',
+      temperament_companion: 'Wants to be part of everything the family does',
+      children_young:      'Friendly and good with children',
+      vocal_quiet:         'Not much of a talker — a quiet companion',
+      experience_first:    'Adaptable and generally healthy',
+    },
+    note: 'Handle the curled ears gently (never force the cartilage flat) and clean them regularly, as ear infections are more common.',
+  },
+  {
     name: 'Russian Blue',
     catApiId: 'rblu',
     wikiTitle: 'Russian_Blue',
-    tags: ['Gentle', 'Reserved', 'Lower-allergen'],
+    tags: ['Gentle', 'Reserved', 'Routine-loving'],
     traits: {
       activity:    { low: 2, medium: 3, high: 2, very: 1 },
       space:       { small_apt: 3, apt: 3, house: 3, outdoor: 2 },
@@ -353,6 +441,33 @@ const BREEDS = [
       alone_half:          'Comfortable being left alone during the day',
     },
     note: 'Can be shy with strangers and dislike change. Allergy tolerance varies, so spend time with the cat first.',
+  },
+  {
+    name: 'Nebelung',
+    catApiId: 'nebe',
+    wikiTitle: 'Nebelung',
+    tags: ['Gentle', 'Shy', 'Silky blue coat'],
+    traits: {
+      activity:    { low: 2, medium: 3, high: 2, very: 1 },
+      space:       { small_apt: 3, apt: 3, house: 3, outdoor: 2 },
+      children:    { none: 3, young: 1, older: 3 },
+      pets:        { none: 3, dogs: 2, cats: 3, both: 2 },
+      alone:       { rarely: 2, few: 3, half: 2, long: 1 },
+      temperament: { lap: 2, companion: 3, independent: 2, playful: 1 },
+      vocal:       { quiet: 3, some: 1, chatty: 0 },
+      size:        { small: 0, medium: 3, large: 2, any: 3 },
+      coat:        { fine: 3, low_shed: 1, allergy: 0 },
+      grooming:    { low: 1, medium: 3, high: 3 },
+      experience:  { first: 2, some: 3, expert: 3 },
+      household:   { quiet: 3, occasional: 1, lively: 0 },
+    },
+    reasons: {
+      household_quiet:     'Loves routine and a peaceful home',
+      vocal_quiet:         'Soft-spoken — gentle meows and purrs',
+      temperament_companion: 'Shy with strangers but devoted to their own family',
+      grooming_medium:     'Silky coat rarely mats, so weekly brushing is enough',
+    },
+    note: 'Easily stressed by noisy visitors or change, so give them a quiet retreat. Generally healthy but prone to weight gain and dental disease.',
   },
   {
     name: 'Chartreux',
@@ -380,6 +495,34 @@ const BREEDS = [
       alone_half:          'Calm and self-possessed while you are out',
     },
     note: 'Their dense double coat sheds heavily in spring. Brush more often then.',
+  },
+  {
+    name: 'Korat',
+    catApiId: 'kora',
+    wikiTitle: 'Korat',
+    tags: ['Good-luck cat', 'Devoted', 'Silver-blue coat'],
+    traits: {
+      activity:    { low: 1, medium: 3, high: 3, very: 2 },
+      space:       { small_apt: 3, apt: 3, house: 3, outdoor: 2 },
+      children:    { none: 3, young: 1, older: 3 },
+      pets:        { none: 3, dogs: 2, cats: 2, both: 2 },
+      alone:       { rarely: 3, few: 2, half: 1, long: 0 },
+      temperament: { lap: 2, companion: 3, independent: 1, playful: 2 },
+      vocal:       { quiet: 2, some: 3, chatty: 1 },
+      size:        { small: 2, medium: 3, large: 0, any: 3 },
+      coat:        { fine: 3, low_shed: 2, allergy: 2 },
+      grooming:    { low: 3, medium: 3, high: 2 },
+      experience:  { first: 2, some: 3, expert: 3 },
+      household:   { quiet: 3, occasional: 1, lively: 0 },
+    },
+    reasons: {
+      temperament_companion: 'Bonds deeply and likes to stay close to their people',
+      coat_allergy:        'Short single coat releases less hair and dander than a double coat',
+      coat_low_shed:       'Sleek single coat sheds lightly',
+      household_quiet:     'Happiest in a calm, predictable home',
+      grooming_low:        'Needs very little grooming',
+    },
+    note: 'Dislikes loud, busy homes and likes to be top cat with other pets. Ask breeders for GM1 and GM2 gangliosidosis DNA results — fatal inherited diseases that carrier testing prevents. Allergy tolerance varies.',
   },
   {
     name: 'Birman',
@@ -423,7 +566,7 @@ const BREEDS = [
       temperament: { lap: 3, companion: 3, independent: 0, playful: 3 },
       vocal:       { quiet: 1, some: 3, chatty: 2 },
       size:        { small: 1, medium: 3, large: 1, any: 3 },
-      coat:        { fine: 3, low_shed: 2, allergy: 1 },
+      coat:        { fine: 3, low_shed: 2, allergy: 2 },
       grooming:    { low: 3, medium: 3, high: 2 },
       experience:  { first: 3, some: 3, expert: 2 },
       household:   { quiet: 1, occasional: 3, lively: 3 },
@@ -434,6 +577,7 @@ const BREEDS = [
       household_lively:   'Loves being in the middle of family life',
       pets_dogs:          'Happily shares a home with a cat-friendly dog',
       grooming_low:       'Glossy short coat needs almost no grooming',
+      coat_allergy:       'Short, dense coat sheds minimally — sometimes suggested for mild allergies',
     },
     note: 'Craves company and does not do well left alone for long. Best if someone is usually home.',
   },
@@ -465,6 +609,89 @@ const BREEDS = [
     note: 'Needs lots of attention and stimulation. Consider a pair if you are out during the day.',
   },
   {
+    name: 'Bombay',
+    catApiId: 'bomb',
+    wikiTitle: 'Bombay_cat',
+    tags: ['Mini panther', 'Affectionate', 'Playful'],
+    traits: {
+      activity:    { low: 1, medium: 3, high: 3, very: 2 },
+      space:       { small_apt: 3, apt: 3, house: 3, outdoor: 2 },
+      children:    { none: 2, young: 3, older: 3 },
+      pets:        { none: 2, dogs: 3, cats: 3, both: 3 },
+      alone:       { rarely: 3, few: 1, half: 1, long: 0 },
+      temperament: { lap: 3, companion: 3, independent: 0, playful: 3 },
+      vocal:       { quiet: 1, some: 3, chatty: 2 },
+      size:        { small: 1, medium: 3, large: 1, any: 3 },
+      coat:        { fine: 3, low_shed: 2, allergy: 1 },
+      grooming:    { low: 3, medium: 3, high: 2 },
+      experience:  { first: 3, some: 3, expert: 2 },
+      household:   { quiet: 1, occasional: 3, lively: 3 },
+    },
+    reasons: {
+      temperament_lap:     'Loves snuggling on your lap or in your bed',
+      children_young:      'Playful and affectionate with children',
+      household_lively:    'Enjoys being the centre of attention',
+      grooming_low:        'Sleek, patent-leather coat needs little grooming',
+      experience_first:    'Friendly and easy to live with',
+    },
+    note: 'Attention-seeking and gets lonely if left alone for long. Some lines carry the fatal Burmese craniofacial defect, so ask breeders about testing, and about HCM.',
+  },
+  {
+    name: 'Burmilla',
+    catApiId: 'buri',
+    wikiTitle: 'Burmilla',
+    tags: ['Silver coat', 'Gentle', 'Family-friendly'],
+    traits: {
+      activity:    { low: 2, medium: 3, high: 2, very: 1 },
+      space:       { small_apt: 3, apt: 3, house: 3, outdoor: 2 },
+      children:    { none: 2, young: 3, older: 3 },
+      pets:        { none: 2, dogs: 3, cats: 3, both: 3 },
+      alone:       { rarely: 3, few: 3, half: 2, long: 1 },
+      temperament: { lap: 2, companion: 3, independent: 1, playful: 2 },
+      vocal:       { quiet: 3, some: 2, chatty: 0 },
+      size:        { small: 1, medium: 3, large: 1, any: 3 },
+      coat:        { fine: 3, low_shed: 1, allergy: 1 },
+      grooming:    { low: 3, medium: 3, high: 2 },
+      experience:  { first: 3, some: 3, expert: 2 },
+      household:   { quiet: 2, occasional: 3, lively: 3 },
+    },
+    reasons: {
+      children_young:      'Gentle and family-friendly',
+      vocal_quiet:         'Quiet and undemanding',
+      temperament_companion: 'Affectionate and engaging without being needy',
+      experience_first:    'Laid-back and easy to care for',
+    },
+    note: 'Ask breeders about PKD (inherited from Persian ancestors) and HCM screening.',
+  },
+  {
+    name: 'Australian Mist',
+    catApiId: 'amis',
+    wikiTitle: 'Australian_Mist',
+    tags: ['Indoor-bred', 'Tolerant', 'Gentle'],
+    traits: {
+      activity:    { low: 3, medium: 3, high: 2, very: 1 },
+      space:       { small_apt: 3, apt: 3, house: 3, outdoor: 2 },
+      children:    { none: 2, young: 3, older: 3 },
+      pets:        { none: 2, dogs: 3, cats: 3, both: 3 },
+      alone:       { rarely: 3, few: 3, half: 2, long: 1 },
+      temperament: { lap: 3, companion: 3, independent: 1, playful: 1 },
+      vocal:       { quiet: 3, some: 2, chatty: 1 },
+      size:        { small: 1, medium: 3, large: 1, any: 3 },
+      coat:        { fine: 3, low_shed: 2, allergy: 1 },
+      grooming:    { low: 3, medium: 3, high: 2 },
+      experience:  { first: 3, some: 3, expert: 2 },
+      household:   { quiet: 2, occasional: 3, lively: 3 },
+    },
+    reasons: {
+      children_young:      'Exceptionally tolerant of handling — great with young children',
+      space_small_apt:     'Bred specifically to be content living indoors',
+      temperament_lap:     'Mellow and happy to be picked up and cuddled',
+      pets_dogs:           'Placid and usually gets on well with dogs',
+      experience_first:    'Relaxed and easy — ideal for first-time owners',
+    },
+    note: 'Rare outside Australia, so expect to wait for a kitten. Energetic as kittens but calm as adults.',
+  },
+  {
     name: 'Siamese',
     catApiId: 'siam',
     wikiTitle: 'Siamese_cat',
@@ -478,7 +705,7 @@ const BREEDS = [
       temperament: { lap: 2, companion: 3, independent: 0, playful: 3 },
       vocal:       { quiet: 0, some: 1, chatty: 3 },
       size:        { small: 1, medium: 3, large: 0, any: 3 },
-      coat:        { fine: 3, low_shed: 2, allergy: 1 },
+      coat:        { fine: 3, low_shed: 2, allergy: 2 },
       grooming:    { low: 3, medium: 3, high: 2 },
       experience:  { first: 1, some: 2, expert: 3 },
       household:   { quiet: 1, occasional: 3, lively: 3 },
@@ -488,6 +715,7 @@ const BREEDS = [
       temperament_companion: 'Forms an intense bond with their people',
       activity_very:       'Smart and athletic — loves puzzle toys and training',
       grooming_low:        'Sleek coat needs minimal grooming',
+      coat_allergy:        'Short, fine coat sheds little — a frequent pick for allergy sufferers',
     },
     note: 'Demands attention and can be loud. Not a good fit if you are out all day or need quiet.',
   },
@@ -522,7 +750,7 @@ const BREEDS = [
     name: 'Balinese',
     catApiId: 'bali',
     wikiTitle: 'Balinese_cat',
-    tags: ['Lower-allergen', 'Chatty', 'Elegant'],
+    tags: ['Chatty', 'Elegant', 'Silky coat'],
     traits: {
       activity:    { low: 0, medium: 2, high: 3, very: 3 },
       space:       { small_apt: 2, apt: 3, house: 3, outdoor: 3 },
@@ -546,10 +774,121 @@ const BREEDS = [
     note: 'Allergen levels vary between individual cats, so spend time with the kitten before committing. Needs lots of company.',
   },
   {
+    name: 'Javanese',
+    catApiId: 'java',
+    wikiTitle: 'Javanese_cat',
+    tags: ['Chatty', 'Devoted', 'Silky single coat'],
+    traits: {
+      activity:    { low: 0, medium: 2, high: 3, very: 3 },
+      space:       { small_apt: 2, apt: 3, house: 3, outdoor: 3 },
+      children:    { none: 2, young: 1, older: 3 },
+      pets:        { none: 2, dogs: 3, cats: 3, both: 3 },
+      alone:       { rarely: 3, few: 1, half: 0, long: 0 },
+      temperament: { lap: 2, companion: 3, independent: 0, playful: 3 },
+      vocal:       { quiet: 0, some: 1, chatty: 3 },
+      size:        { small: 1, medium: 3, large: 0, any: 3 },
+      coat:        { fine: 3, low_shed: 2, allergy: 3 },
+      grooming:    { low: 2, medium: 3, high: 3 },
+      experience:  { first: 1, some: 3, expert: 3 },
+      household:   { quiet: 1, occasional: 3, lively: 3 },
+    },
+    reasons: {
+      coat_allergy:        'Shares the Balinese\'s reputation for producing less Fel d 1',
+      coat_low_shed:       'Single coat with no undercoat sheds less than most longhairs',
+      vocal_chatty:        'A true conversationalist — expect a steady stream of chatter',
+      temperament_companion: 'Wants to be at the centre of everything you do',
+      grooming_medium:     'Silky coat rarely mats — a weekly brush is enough',
+    },
+    note: 'The CFA now shows it as a colour division of the Balinese (same breed, extra point colours). Needs lots of company and play. Allergen levels vary between cats, so meet yours first.',
+  },
+  {
+    name: 'Colorpoint Shorthair',
+    catApiId: 'csho',
+    wikiTitle: 'Colorpoint_Shorthair',
+    tags: ['Very vocal', 'Affectionate', 'Colourful points'],
+    traits: {
+      activity:    { low: 0, medium: 1, high: 3, very: 3 },
+      space:       { small_apt: 1, apt: 3, house: 3, outdoor: 3 },
+      children:    { none: 2, young: 1, older: 3 },
+      pets:        { none: 2, dogs: 3, cats: 3, both: 3 },
+      alone:       { rarely: 3, few: 1, half: 0, long: 0 },
+      temperament: { lap: 2, companion: 3, independent: 0, playful: 3 },
+      vocal:       { quiet: 0, some: 1, chatty: 3 },
+      size:        { small: 1, medium: 3, large: 0, any: 3 },
+      coat:        { fine: 3, low_shed: 2, allergy: 2 },
+      grooming:    { low: 3, medium: 3, high: 2 },
+      experience:  { first: 1, some: 2, expert: 3 },
+      household:   { quiet: 1, occasional: 3, lively: 3 },
+    },
+    reasons: {
+      vocal_chatty:        'Famously talkative, with a huge range of sounds',
+      temperament_companion: 'Loves to be close and seems to sense your mood',
+      coat_allergy:        'Short, fine Siamese-type coat — a frequent pick for allergy sufferers',
+      activity_very:       'Athletic and clever — thrives on daily interactive play',
+      grooming_low:        'Sleek coat needs minimal grooming',
+    },
+    note: 'Essentially a Siamese in red, cream, tortie or lynx points, and just as vocal and needy. Not suited to long days alone. Regular tooth brushing helps prevent dental disease.',
+  },
+  {
+    name: 'Snowshoe',
+    catApiId: 'snow',
+    wikiTitle: 'Snowshoe_cat',
+    tags: ['White "boots"', 'Chatty', 'Family-friendly'],
+    traits: {
+      activity:    { low: 1, medium: 3, high: 3, very: 2 },
+      space:       { small_apt: 2, apt: 3, house: 3, outdoor: 3 },
+      children:    { none: 2, young: 3, older: 3 },
+      pets:        { none: 2, dogs: 3, cats: 3, both: 3 },
+      alone:       { rarely: 3, few: 1, half: 0, long: 0 },
+      temperament: { lap: 2, companion: 3, independent: 0, playful: 3 },
+      vocal:       { quiet: 1, some: 3, chatty: 2 },
+      size:        { small: 1, medium: 3, large: 1, any: 3 },
+      coat:        { fine: 3, low_shed: 1, allergy: 1 },
+      grooming:    { low: 3, medium: 3, high: 2 },
+      experience:  { first: 3, some: 3, expert: 2 },
+      household:   { quiet: 1, occasional: 3, lively: 3 },
+    },
+    reasons: {
+      vocal_some:          'Conversational, with a softer voice than the Siamese',
+      children_young:      'Happy around children and tolerant of being picked up',
+      household_lively:    'Does well in busy family homes',
+      temperament_playful: 'Playful — and many even enjoy water',
+      experience_first:    'Easy-going and generally healthy',
+    },
+    note: 'Rare and very people-focused, so it can develop separation anxiety if left alone for long.',
+  },
+  {
+    name: 'Havana Brown',
+    catApiId: 'hbro',
+    wikiTitle: 'Havana_Brown',
+    tags: ['Rare', 'People-oriented', 'Chocolate coat'],
+    traits: {
+      activity:    { low: 1, medium: 3, high: 3, very: 2 },
+      space:       { small_apt: 3, apt: 3, house: 3, outdoor: 2 },
+      children:    { none: 2, young: 2, older: 3 },
+      pets:        { none: 2, dogs: 3, cats: 3, both: 3 },
+      alone:       { rarely: 3, few: 2, half: 1, long: 0 },
+      temperament: { lap: 2, companion: 3, independent: 0, playful: 3 },
+      vocal:       { quiet: 2, some: 3, chatty: 1 },
+      size:        { small: 1, medium: 3, large: 0, any: 3 },
+      coat:        { fine: 3, low_shed: 1, allergy: 1 },
+      grooming:    { low: 3, medium: 3, high: 2 },
+      experience:  { first: 2, some: 3, expert: 3 },
+      household:   { quiet: 2, occasional: 3, lively: 2 },
+    },
+    reasons: {
+      temperament_companion: 'Wants to be involved in everything you do',
+      vocal_some:          'Chats in sweet chirps and trills rather than demanding meows',
+      pets_both:           'Compatible with other family pets',
+      grooming_low:        'Glossy short coat needs very little grooming',
+    },
+    note: 'Extremely rare (estimated at under 1,000 cats worldwide), so expect a long wait. Needs an attentive owner and does not like long days alone.',
+  },
+  {
     name: 'Siberian',
     catApiId: 'sibe',
     wikiTitle: 'Siberian_cat',
-    tags: ['Lower-allergen', 'Robust', 'Affectionate'],
+    tags: ['Robust', 'Affectionate', 'Playful'],
     traits: {
       activity:    { low: 1, medium: 3, high: 3, very: 2 },
       space:       { small_apt: 1, apt: 2, house: 3, outdoor: 3 },
@@ -559,7 +898,7 @@ const BREEDS = [
       temperament: { lap: 2, companion: 3, independent: 2, playful: 3 },
       vocal:       { quiet: 2, some: 3, chatty: 1 },
       size:        { small: 0, medium: 1, large: 3, any: 3 },
-      coat:        { fine: 3, low_shed: 1, allergy: 2 },
+      coat:        { fine: 3, low_shed: 1, allergy: 3 },
       grooming:    { low: 1, medium: 3, high: 3 },
       experience:  { first: 3, some: 3, expert: 3 },
       household:   { quiet: 2, occasional: 3, lively: 3 },
@@ -678,10 +1017,67 @@ const BREEDS = [
     reasons: {
       activity_very:     'Acrobatic and energetic — a perpetual kitten',
       coat_low_shed:     'Soft, curly coat sheds very little',
+      coat_allergy:      'Sheds very little, so less allergen-laden fur around the home',
       temperament_playful: 'Loves fetch and interactive games',
       pets_both:         'Sociable with other cats and dogs',
     },
     note: 'Needs warmth and lots of play. Not happy left alone for long days.',
+  },
+  {
+    name: 'LaPerm',
+    catApiId: 'lape',
+    wikiTitle: 'LaPerm',
+    tags: ['Curly coat', 'Affectionate', 'Outgoing'],
+    traits: {
+      activity:    { low: 1, medium: 3, high: 3, very: 2 },
+      space:       { small_apt: 3, apt: 3, house: 3, outdoor: 2 },
+      children:    { none: 2, young: 2, older: 3 },
+      pets:        { none: 2, dogs: 3, cats: 3, both: 3 },
+      alone:       { rarely: 3, few: 2, half: 1, long: 0 },
+      temperament: { lap: 3, companion: 3, independent: 0, playful: 2 },
+      vocal:       { quiet: 2, some: 3, chatty: 1 },
+      size:        { small: 2, medium: 3, large: 0, any: 3 },
+      coat:        { fine: 3, low_shed: 3, allergy: 2 },
+      grooming:    { low: 2, medium: 3, high: 3 },
+      experience:  { first: 3, some: 3, expert: 2 },
+      household:   { quiet: 2, occasional: 3, lively: 3 },
+    },
+    reasons: {
+      coat_low_shed:       'Soft curly coat sheds considerably less than most breeds',
+      coat_allergy:        'Curls help hold in dander — often suggested for allergy sufferers',
+      temperament_lap:     'Active, but takes every chance to curl up in your lap',
+      pets_both:           'Gets along with other cats and cat-friendly dogs',
+      experience_first:    'Easy-going and generally healthy — a good first cat',
+    },
+    note: 'No known breed-specific genetic diseases. Teach young children not to pull the curls. Allergy tolerance still varies from cat to cat.',
+  },
+  {
+    name: 'Selkirk Rex',
+    catApiId: 'srex',
+    wikiTitle: 'Selkirk_Rex',
+    tags: ['Curly plush coat', 'Patient', 'Cuddly'],
+    traits: {
+      activity:    { low: 3, medium: 3, high: 1, very: 0 },
+      space:       { small_apt: 3, apt: 3, house: 3, outdoor: 2 },
+      children:    { none: 2, young: 3, older: 3 },
+      pets:        { none: 2, dogs: 3, cats: 3, both: 3 },
+      alone:       { rarely: 3, few: 3, half: 2, long: 1 },
+      temperament: { lap: 3, companion: 2, independent: 1, playful: 1 },
+      vocal:       { quiet: 3, some: 2, chatty: 0 },
+      size:        { small: 0, medium: 2, large: 3, any: 3 },
+      coat:        { fine: 3, low_shed: 1, allergy: 0 },
+      grooming:    { low: 1, medium: 3, high: 3 },
+      experience:  { first: 3, some: 3, expert: 2 },
+      household:   { quiet: 2, occasional: 3, lively: 3 },
+    },
+    reasons: {
+      temperament_lap:     'Placid and cuddly — happy to be held',
+      children_young:      'Patient and tolerant of handling',
+      household_lively:    'Mellow enough for a busy home',
+      vocal_quiet:         'Soft-spoken and rarely demanding',
+      activity_low:        'Easy-going with modest play needs',
+    },
+    note: 'Despite the curls it is not a low-allergen breed — it sheds moderately year-round. Ask breeders for PKD and HCM screening of both parents.',
   },
   {
     name: 'Sphynx',
@@ -707,8 +1103,65 @@ const BREEDS = [
       temperament_lap:   'A heat-seeking cuddler that loves being under the covers',
       household_lively:  'An extroverted show-off that loves visitors',
       grooming_high:     'Your bathing routine keeps their skin healthy',
+      coat_allergy:      'No fur to spread allergens around the home (the skin still produces them)',
     },
-    note: 'Not truly allergen-free. Needs a bath every week or two to remove skin oils, and must be kept warm and indoors because they sunburn. Ask about HCM screening.',
+    note: 'Not truly allergen-free. Needs a bath every week or two to remove skin oils, and must be kept warm and indoors because they sunburn. Ask about HCM screening. Hairless cats cannot be bred, sold or newly acquired in the Netherlands since 2026, and Germany treats breeding whiskerless cats as "torture breeding".',
+  },
+  {
+    name: 'Donskoy',
+    catApiId: 'dons',
+    wikiTitle: 'Donskoy_cat',
+    tags: ['Hairless', 'Warm-hearted', 'Sociable'],
+    traits: {
+      activity:    { low: 1, medium: 3, high: 3, very: 2 },
+      space:       { small_apt: 3, apt: 3, house: 3, outdoor: 1 },
+      children:    { none: 2, young: 3, older: 3 },
+      pets:        { none: 2, dogs: 3, cats: 3, both: 3 },
+      alone:       { rarely: 3, few: 1, half: 0, long: 0 },
+      temperament: { lap: 3, companion: 3, independent: 0, playful: 2 },
+      vocal:       { quiet: 2, some: 3, chatty: 1 },
+      size:        { small: 1, medium: 3, large: 1, any: 3 },
+      coat:        { fine: 2, low_shed: 3, allergy: 2 },
+      grooming:    { low: 0, medium: 2, high: 3 },
+      experience:  { first: 1, some: 2, expert: 3 },
+      household:   { quiet: 1, occasional: 3, lively: 3 },
+    },
+    reasons: {
+      coat_low_shed:       'Little or no fur to shed',
+      coat_allergy:        'Little or no fur to spread allergens around the home',
+      temperament_lap:     'A warm-hearted cuddler that seeks out laps and blankets',
+      pets_both:           'Very social with other cats and pets',
+      grooming_high:       'Your wipe-downs and baths keep their skin healthy',
+    },
+    note: 'Not allergen-free. Needs a bath every week or two, warmth, sun protection and dental care. Hairless cats cannot be bred, sold or newly acquired in the Netherlands since 2026, and Germany treats breeding whiskerless cats as "torture breeding".',
+  },
+  {
+    name: 'Peterbald',
+    catApiId: null,
+    wikiTitle: 'Peterbald',
+    tags: ['Bald to velvety', 'Devoted', 'Energetic'],
+    traits: {
+      activity:    { low: 0, medium: 2, high: 3, very: 3 },
+      space:       { small_apt: 3, apt: 3, house: 3, outdoor: 1 },
+      children:    { none: 2, young: 2, older: 3 },
+      pets:        { none: 2, dogs: 3, cats: 3, both: 3 },
+      alone:       { rarely: 3, few: 1, half: 0, long: 0 },
+      temperament: { lap: 3, companion: 3, independent: 0, playful: 3 },
+      vocal:       { quiet: 1, some: 3, chatty: 2 },
+      size:        { small: 1, medium: 3, large: 0, any: 3 },
+      coat:        { fine: 2, low_shed: 3, allergy: 2 },
+      grooming:    { low: 0, medium: 2, high: 3 },
+      experience:  { first: 1, some: 2, expert: 3 },
+      household:   { quiet: 1, occasional: 3, lively: 3 },
+    },
+    reasons: {
+      coat_low_shed:       'Bald or velvety coat means very little shedding',
+      coat_allergy:        'Little or no fur to spread allergens around the home',
+      temperament_companion: 'Follows their favourite person everywhere',
+      activity_high:       'Playful, curious and loves to climb',
+      grooming_high:       'Regular bathing keeps their skin healthy',
+    },
+    note: 'Coats range from fully bald to short and straight, so ask which type you are getting. Bald cats need baths, warmth and sun protection, and fall under the Netherlands\' 2026 hairless-cat ban. Not allergen-free.',
   },
   {
     name: 'Abyssinian',
@@ -766,6 +1219,62 @@ const BREEDS = [
     note: 'The long-haired Abyssinian, with the same high energy. Needs climbing space and daily play.',
   },
   {
+    name: 'Egyptian Mau',
+    catApiId: 'emau',
+    wikiTitle: 'Egyptian_Mau',
+    tags: ['Fastest cat', 'Loyal', 'Naturally spotted'],
+    traits: {
+      activity:    { low: 0, medium: 1, high: 3, very: 3 },
+      space:       { small_apt: 0, apt: 2, house: 3, outdoor: 3 },
+      children:    { none: 2, young: 1, older: 3 },
+      pets:        { none: 2, dogs: 2, cats: 3, both: 2 },
+      alone:       { rarely: 3, few: 2, half: 1, long: 0 },
+      temperament: { lap: 1, companion: 3, independent: 2, playful: 3 },
+      vocal:       { quiet: 2, some: 3, chatty: 1 },
+      size:        { small: 2, medium: 3, large: 0, any: 3 },
+      coat:        { fine: 3, low_shed: 1, allergy: 1 },
+      grooming:    { low: 3, medium: 3, high: 2 },
+      experience:  { first: 1, some: 2, expert: 3 },
+      household:   { quiet: 3, occasional: 2, lively: 1 },
+    },
+    reasons: {
+      activity_very:       'The fastest domestic cat — loves to run, leap and play',
+      temperament_companion: 'Forms a deep bond with a favourite person',
+      vocal_some:          'Communicates in soft chirps and melodic trills',
+      household_quiet:     'Reserved with strangers and happiest in a calm home',
+      grooming_low:        'Short, silky coat needs little grooming',
+    },
+    note: 'Can be shy with visitors and needs daily exercise and climbing space. One of the healthier pedigree breeds, but ask about HCM screening.',
+  },
+  {
+    name: 'Ocicat',
+    catApiId: 'ocic',
+    wikiTitle: 'Ocicat',
+    tags: ['Wild looks', 'Dog-like', 'Social'],
+    traits: {
+      activity:    { low: 0, medium: 1, high: 3, very: 3 },
+      space:       { small_apt: 1, apt: 2, house: 3, outdoor: 3 },
+      children:    { none: 2, young: 3, older: 3 },
+      pets:        { none: 2, dogs: 3, cats: 3, both: 3 },
+      alone:       { rarely: 3, few: 1, half: 0, long: 0 },
+      temperament: { lap: 2, companion: 3, independent: 0, playful: 3 },
+      vocal:       { quiet: 1, some: 3, chatty: 2 },
+      size:        { small: 0, medium: 3, large: 2, any: 3 },
+      coat:        { fine: 3, low_shed: 2, allergy: 2 },
+      grooming:    { low: 3, medium: 3, high: 2 },
+      experience:  { first: 2, some: 3, expert: 3 },
+      household:   { quiet: 1, occasional: 3, lively: 3 },
+    },
+    reasons: {
+      activity_very:       'Athletic and clever — loves puzzles and fetch',
+      temperament_companion: 'Dog-like loyalty to the whole family',
+      children_young:      'Outgoing and good with children',
+      coat_allergy:        'Short, close coat sheds little — often listed as allergy-friendlier',
+      pets_both:           'Usually gets on well with other pets',
+    },
+    note: 'All-domestic despite the wild look, so no hybrid restrictions apply. Dislikes being left alone. Ask breeders about renal amyloidosis, HCM and PRA.',
+  },
+  {
     name: 'Bengal',
     catApiId: 'beng',
     wikiTitle: 'Bengal_cat',
@@ -779,7 +1288,7 @@ const BREEDS = [
       temperament: { lap: 0, companion: 2, independent: 2, playful: 3 },
       vocal:       { quiet: 1, some: 3, chatty: 2 },
       size:        { small: 0, medium: 3, large: 2, any: 3 },
-      coat:        { fine: 3, low_shed: 3, allergy: 1 },
+      coat:        { fine: 3, low_shed: 3, allergy: 2 },
       grooming:    { low: 3, medium: 3, high: 2 },
       experience:  { first: 0, some: 1, expert: 3 },
       household:   { quiet: 1, occasional: 2, lively: 3 },
@@ -790,8 +1299,36 @@ const BREEDS = [
       coat_low_shed:     'Sleek pelt-like coat sheds relatively little',
       experience_expert: 'Clever and demanding — best with an experienced owner',
       household_lively:  'Unfazed by busy, active households',
+      coat_allergy:      'Pelt-like coat sheds relatively little — often listed as allergy-friendlier',
     },
     note: 'Restricted or banned in some areas (e.g. Hawaii, Connecticut, New York City), especially early generations, so check local laws. Can become destructive without enough stimulation.',
+  },
+  {
+    name: 'Toyger',
+    catApiId: 'toyg',
+    wikiTitle: 'Toyger',
+    tags: ['Tiger stripes', 'Trainable', 'Easy-going'],
+    traits: {
+      activity:    { low: 1, medium: 2, high: 3, very: 3 },
+      space:       { small_apt: 1, apt: 3, house: 3, outdoor: 3 },
+      children:    { none: 2, young: 3, older: 3 },
+      pets:        { none: 2, dogs: 3, cats: 3, both: 3 },
+      alone:       { rarely: 3, few: 2, half: 2, long: 1 },
+      temperament: { lap: 1, companion: 3, independent: 1, playful: 3 },
+      vocal:       { quiet: 2, some: 3, chatty: 1 },
+      size:        { small: 0, medium: 3, large: 2, any: 3 },
+      coat:        { fine: 3, low_shed: 1, allergy: 1 },
+      grooming:    { low: 3, medium: 3, high: 2 },
+      experience:  { first: 2, some: 3, expert: 3 },
+      household:   { quiet: 1, occasional: 3, lively: 3 },
+    },
+    reasons: {
+      activity_high:       'Active and playful, and can be trained to walk on a leash',
+      temperament_companion: 'Loyal and people-loving — often called dog-like',
+      children_young:      'Friendly with children and dogs',
+      household_lively:    'Laid-back enough for a busy home',
+    },
+    note: 'All-domestic (not a wild hybrid). Ask about heart screening, as some lines carry HCM and cataract risks from Bengal ancestry.',
   },
   {
     name: 'Savannah',
@@ -875,6 +1412,117 @@ const BREEDS = [
     note: 'Famous for loving water. Most dislike being held or cuddled, so not a lap cat.',
   },
   {
+    name: 'Japanese Bobtail',
+    catApiId: 'jbob',
+    wikiTitle: 'Japanese_Bobtail',
+    tags: ['Pom-pom tail', 'Talkative', 'Playful'],
+    traits: {
+      activity:    { low: 0, medium: 1, high: 3, very: 3 },
+      space:       { small_apt: 1, apt: 3, house: 3, outdoor: 3 },
+      children:    { none: 2, young: 3, older: 3 },
+      pets:        { none: 2, dogs: 3, cats: 3, both: 3 },
+      alone:       { rarely: 3, few: 2, half: 1, long: 0 },
+      temperament: { lap: 1, companion: 3, independent: 1, playful: 3 },
+      vocal:       { quiet: 1, some: 2, chatty: 3 },
+      size:        { small: 2, medium: 3, large: 0, any: 3 },
+      coat:        { fine: 3, low_shed: 1, allergy: 1 },
+      grooming:    { low: 3, medium: 3, high: 2 },
+      experience:  { first: 2, some: 3, expert: 3 },
+      household:   { quiet: 1, occasional: 3, lively: 3 },
+    },
+    reasons: {
+      vocal_chatty:        'Talks in a sing-song range of chirps and meows',
+      children_young:      'An energetic playmate that gets on well with kids',
+      pets_dogs:           'Outgoing and usually good with dogs',
+      activity_very:       'Loves fetch and seemingly endless play',
+      household_lively:    'Adapts easily to busy homes and even travel',
+    },
+    note: 'The bobbed tail comes from a recessive gene that, unlike the Manx gene, is not linked to spinal problems. High energy, so plan for plenty of play and climbing space.',
+  },
+  {
+    name: 'Kurilian Bobtail',
+    catApiId: 'kuri',
+    wikiTitle: 'Kurilian_Bobtail',
+    tags: ['Pom-pom tail', 'Hunter', 'Water-loving'],
+    traits: {
+      activity:    { low: 0, medium: 2, high: 3, very: 3 },
+      space:       { small_apt: 0, apt: 1, house: 3, outdoor: 3 },
+      children:    { none: 2, young: 3, older: 3 },
+      pets:        { none: 3, dogs: 3, cats: 3, both: 3 },
+      alone:       { rarely: 2, few: 3, half: 2, long: 1 },
+      temperament: { lap: 1, companion: 2, independent: 3, playful: 3 },
+      vocal:       { quiet: 2, some: 3, chatty: 1 },
+      size:        { small: 0, medium: 2, large: 3, any: 3 },
+      coat:        { fine: 3, low_shed: 0, allergy: 0 },
+      grooming:    { low: 2, medium: 3, high: 3 },
+      experience:  { first: 2, some: 3, expert: 3 },
+      household:   { quiet: 2, occasional: 3, lively: 3 },
+    },
+    reasons: {
+      temperament_independent: 'Clever and independent, yet snuggles with a favourite person',
+      activity_very:       'Very active, with a strong hunting and play drive',
+      pets_dogs:           'Adapts well to dogs and other cats',
+      space_outdoor:       'Loves high perches and room to explore',
+    },
+    note: 'A keen hunter, so keep fish tanks and small pets such as hamsters well out of reach. Many love playing in water.',
+  },
+  {
+    name: 'American Bobtail',
+    catApiId: 'abob',
+    wikiTitle: 'American_Bobtail',
+    tags: ['Bobbed tail', 'Dog-like', 'Adaptable'],
+    traits: {
+      activity:    { low: 1, medium: 3, high: 3, very: 2 },
+      space:       { small_apt: 3, apt: 3, house: 3, outdoor: 3 },
+      children:    { none: 2, young: 3, older: 3 },
+      pets:        { none: 2, dogs: 3, cats: 3, both: 3 },
+      alone:       { rarely: 3, few: 3, half: 2, long: 1 },
+      temperament: { lap: 2, companion: 3, independent: 1, playful: 3 },
+      vocal:       { quiet: 2, some: 3, chatty: 1 },
+      size:        { small: 0, medium: 2, large: 3, any: 3 },
+      coat:        { fine: 3, low_shed: 0, allergy: 0 },
+      grooming:    { low: 2, medium: 3, high: 3 },
+      experience:  { first: 3, some: 3, expert: 2 },
+      household:   { quiet: 2, occasional: 3, lively: 3 },
+    },
+    reasons: {
+      space_small_apt:     'Highly adaptable — happy in a small apartment or a big house',
+      temperament_playful: 'Loves fetch, hide-and-seek and puzzle toys',
+      children_young:      'A devoted family cat that gets on with kids and pets',
+      household_lively:    'Adapts easily to new situations — even travel',
+      experience_first:    'Easy-going and adaptable for first-time owners',
+    },
+    note: 'Prone to obesity and diabetes, so portion control and daily play matter.',
+  },
+  {
+    name: 'Pixie-bob',
+    catApiId: 'pixi',
+    wikiTitle: 'Pixie-bob',
+    tags: ['Bobcat looks', 'Dog-like', 'Easy-going'],
+    traits: {
+      activity:    { low: 2, medium: 3, high: 3, very: 1 },
+      space:       { small_apt: 1, apt: 2, house: 3, outdoor: 3 },
+      children:    { none: 2, young: 3, older: 3 },
+      pets:        { none: 2, dogs: 3, cats: 3, both: 3 },
+      alone:       { rarely: 3, few: 3, half: 2, long: 1 },
+      temperament: { lap: 1, companion: 3, independent: 2, playful: 2 },
+      vocal:       { quiet: 3, some: 2, chatty: 0 },
+      size:        { small: 0, medium: 2, large: 3, any: 3 },
+      coat:        { fine: 3, low_shed: 1, allergy: 0 },
+      grooming:    { low: 3, medium: 3, high: 2 },
+      experience:  { first: 3, some: 3, expert: 2 },
+      household:   { quiet: 2, occasional: 3, lively: 3 },
+    },
+    reasons: {
+      pets_dogs:           'Gets along particularly well with dogs',
+      temperament_companion: 'Devoted — often described as a dog in a cat\'s body',
+      vocal_quiet:         'Chirps and trills rather than meows',
+      children_young:      'Calm and stable around children',
+      experience_first:    'Relaxed, easy-going and generally healthy',
+    },
+    note: 'Despite the bobcat look it is an all-domestic breed. Many have extra toes (polydactyly), so remember to trim those claws too.',
+  },
+  {
     name: 'Singapura',
     catApiId: 'sing',
     wikiTitle: 'Singapura_cat',
@@ -905,8 +1553,20 @@ const BREEDS = [
 
 // ── RECOMMENDATION ENGINE ─────────────────────────────────────────────────────
 
+function isAllergyFriendly(breed) {
+  return breed.traits.coat.allergy >= ALLERGY_FRIENDLY_MIN;
+}
+
+// An answer with a minWeight (e.g. allergies) rules out breeds scoring below it
+function isEligible(breed, answers) {
+  return QUESTIONS.every(q => {
+    const opt = q.options.find(o => o.value === answers[q.id]);
+    return !opt || opt.minWeight === undefined || breed.traits[q.id][opt.value] >= opt.minWeight;
+  });
+}
+
 function scoreBreeds(answers) {
-  return BREEDS.map(breed => {
+  return BREEDS.filter(breed => isEligible(breed, answers)).map(breed => {
     let score = 0;
     const matchedReasonKeys = [];
 
@@ -1078,15 +1738,19 @@ async function fetchWikipediaImage(wikiTitle) {
 }
 
 async function fetchBreedImage(breed) {
-  try {
-    return await fetchCatApiImage(breed.catApiId);
-  } catch {
+  // Not every breed is on TheCatAPI (catApiId: null), so skip straight to Wikipedia
+  const sources = [
+    breed.catApiId && (() => fetchCatApiImage(breed.catApiId)),
+    () => fetchWikipediaImage(breed.wikiTitle),
+  ].filter(Boolean);
+  for (const source of sources) {
     try {
-      return await fetchWikipediaImage(breed.wikiTitle);
+      return await source();
     } catch {
-      return null;
+      // Try the next source
     }
   }
+  return null;
 }
 
 function showImagePlaceholder(skeleton) {
@@ -1123,6 +1787,7 @@ function buildBreedCard(scored, rank) {
         </div>
       </div>
       <div class="breed-tags">
+        ${isAllergyFriendly(breed) ? '<span class="breed-tag breed-tag-allergy">Allergy-friendlier</span>' : ''}
         ${breed.tags.map(t => `<span class="breed-tag">${t}</span>`).join('')}
       </div>
       <div class="breed-reasons-title">Why this breed suits you</div>
@@ -1172,6 +1837,8 @@ function showResults() {
     const scored = scoreBreeds(state.answers);
     const top5 = scored.slice(0, 5);
 
+    document.getElementById('allergyCallout').hidden = state.answers.coat !== 'allergy';
+
     const grid = document.getElementById('resultsGrid');
     grid.innerHTML = '';
     top5.forEach((s, i) => {
@@ -1192,6 +1859,9 @@ function showResults() {
 // ── INIT ──────────────────────────────────────────────────────────────────────
 
 if (typeof document !== 'undefined') {
+  document.getElementById('breedCount').textContent =
+    `✔ ${BREEDS.length} breeds, including ${BREEDS.filter(isAllergyFriendly).length} allergy-friendlier picks`;
+
   document.getElementById('startBtn').addEventListener('click', () => {
     showScreen('screenQuiz');
     renderQuestion(0);
@@ -1214,5 +1884,5 @@ if (typeof document !== 'undefined') {
 }
 
 if (typeof module !== 'undefined') {
-  module.exports = { QUESTIONS, BREEDS, scoreBreeds, MAX_SCORE };
+  module.exports = { QUESTIONS, BREEDS, scoreBreeds, isAllergyFriendly, MAX_SCORE };
 }
