@@ -69,6 +69,25 @@ body {
   letter-spacing: -0.02em;
 }
 
+.logo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.logo-switch {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-decoration: none;
+}
+
+.logo-switch:hover {
+  color: var(--primary);
+}
+
 .progress-wrapper {
   display: flex;
   flex-direction: column;
